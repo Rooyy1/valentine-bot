@@ -1,5 +1,4 @@
 from aiogram import Router, F
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import CallbackQuery
 
 from data.products import PRODUCTS
@@ -20,7 +19,7 @@ async def product_more(callback: CallbackQuery) -> None:
         f"{product['short']}\n\n"
         f"{features}"
     )
-    await _edit_or_send(callback, text, product_keyboard(key))
+    await callback.message.answer(text, reply_markup=product_keyboard(key))
     await callback.answer()
 
 
@@ -29,7 +28,7 @@ async def product_why(callback: CallbackQuery) -> None:
     key = callback.data.removeprefix("prod_why_")
     product = PRODUCTS[key]
     text = f"<b>Почему тебе подходит «{product['title']}»</b>\n\n{product['why']}"
-    await _edit_or_send(callback, text, product_keyboard(key))
+    await callback.message.answer(text, reply_markup=product_keyboard(key))
     await callback.answer()
 
 
@@ -38,13 +37,13 @@ async def product_choose(callback: CallbackQuery) -> None:
     key = callback.data.removeprefix("prod_choose_")
     product = PRODUCTS[key]
     text = CHOOSE_CONFIRM_TEXT.format(title=product["title"], price=product["price"])
-    await _edit_or_send(callback, text, final_cta_keyboard())
+    await callback.message.answer(text, reply_markup=final_cta_keyboard())
     await callback.answer()
 
 
 @router.callback_query(F.data == "prod_other")
 async def show_all_products(callback: CallbackQuery) -> None:
-    await _edit_or_send(callback, ALL_PRODUCTS_TEXT, all_products_keyboard())
+    await callback.message.answer(ALL_PRODUCTS_TEXT, reply_markup=all_products_keyboard())
     await callback.answer()
 
 
@@ -59,18 +58,11 @@ async def product_view(callback: CallbackQuery) -> None:
         f"{features}\n\n"
         f"<i>{product['why']}</i>"
     )
-    await _edit_or_send(callback, text, product_keyboard(key))
+    await callback.message.answer(text, reply_markup=product_keyboard(key))
     await callback.answer()
 
 
 @router.callback_query(F.data == "ask_trainer")
 async def ask_trainer(callback: CallbackQuery) -> None:
-    await _edit_or_send(callback, ASK_TRAINER_TEXT, final_cta_keyboard())
+    await callback.message.answer(ASK_TRAINER_TEXT, reply_markup=final_cta_keyboard())
     await callback.answer()
-
-
-async def _edit_or_send(callback: CallbackQuery, text: str, keyboard) -> None:
-    try:
-        await callback.message.edit_text(text, reply_markup=keyboard)
-    except TelegramBadRequest:
-        await callback.message.answer(text, reply_markup=keyboard)
