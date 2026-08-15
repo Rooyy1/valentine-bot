@@ -18,26 +18,14 @@ logger = logging.getLogger(__name__)
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext) -> None:
     await state.clear()
-    await send_welcome_parts(message)
-
-
-async def send_welcome_parts(message: Message) -> None:
-    # Разбиваем историю на абзацы (по двум переносам строк)
-    parts = WELCOME_WITH_STORY.split("\n\n")
-    
-    # 1. Отправляем фото с первой частью (если фото работает)
+    # Отправляем одно полное сообщение с фото + история
     try:
-        await message.answer_photo(photo=TRAINER_PHOTO_ID, caption=parts[0])
+        await message.answer_photo(photo=TRAINER_PHOTO_ID, caption=WELCOME_WITH_STORY)
     except TelegramBadRequest:
         logger.warning("Не удалось отправить фото, отправляю без фото.")
-        await message.answer(parts[0])
+        await message.answer(WELCOME_WITH_STORY)
     
-    # 2. Отправляем остальные части с задержкой 1.5 секунды
-    for part in parts[1:]:
-        await asyncio.sleep(1.5)
-        await message.answer(part)
-    
-    # 3. После всех частей ждём 3 секунды и отправляем меню
+    # Ждём 3 секунды и отправляем меню новым сообщением
     await asyncio.sleep(3)
     await message.answer(MAIN_MENU_PROMPT, reply_markup=main_menu_keyboard())
 
@@ -45,8 +33,6 @@ async def send_welcome_parts(message: Message) -> None:
 @router.callback_query(F.data == "back_main")
 async def back_to_main(callback: CallbackQuery, state: FSMContext) -> None:
     await state.clear()
-    try:
-        await callback.message.edit_text(MAIN_MENU_PROMPT, reply_markup=main_menu_keyboard())
-    except TelegramBadRequest:
-        await callback.message.answer(MAIN_MENU_PROMPT, reply_markup=main_menu_keyboard())
+    # При возврате в меню отправляем новое сообщение (не редактируем)
+    await callback.message.answer(MAIN_MENU_PROMPT, reply_markup=main_menu_keyboard())
     await callback.answer()

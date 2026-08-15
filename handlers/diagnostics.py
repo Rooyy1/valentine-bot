@@ -1,97 +1,68 @@
 from aiogram import Router, F
-from aiogram.exceptions import TelegramBadRequest
-from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from data.products import PRODUCTS
-from data.recommend import recommend_product
-from data.texts import (
-    CATEGORY_INTRO,
-    DIAG_INTRO,
-    Q_BUDGET,
-    Q_FORMAT,
-    Q_GOAL,
-    Q_PROBLEM,
-    RECOMMENDATION_HEADER,
-)
-from keyboards.diagnostics import (
-    budget_keyboard,
-    format_keyboard,
-    goal_keyboard,
-    problem_keyboard,
-)
-from keyboards.product import product_keyboard
-from states import Diagnostics
+from data.texts import ALL_PRODUCTS_TEXT, ASK_TRAINER_TEXT, CHOOSE_CONFIRM_TEXT
+from keyboards.product import all_products_keyboard, final_cta_keyboard, product_keyboard
 
 router = Router()
 
 
-@router.callback_query(F.data.startswith("cat_"))
-async def choose_category(callback: CallbackQuery, state: FSMContext) -> None:
-    intro = CATEGORY_INTRO.get(callback.data, "Хорошо, давай разберёмся 🙌")
-    await state.update_data(category=callback.data)
-    await state.set_state(Diagnostics.goal)
-    text = f"{intro}\n\n{DIAG_INTRO}\n\n{Q_GOAL}"
-    await _edit_or_send(callback, text, goal_keyboard())
-    await callback.answer()
-
-
-@router.callback_query(Diagnostics.goal, F.data.startswith("goal_"))
-async def process_goal(callback: CallbackQuery, state: FSMContext) -> None:
-    value = callback.data.removeprefix("goal_")
-    await state.update_data(goal=value)
-    await state.set_state(Diagnostics.problem)
-    await _edit_or_send(callback, Q_PROBLEM, problem_keyboard())
-    await callback.answer()
-
-
-@router.callback_query(Diagnostics.problem, F.data.startswith("problem_"))
-async def process_problem(callback: CallbackQuery, state: FSMContext) -> None:
-    value = callback.data.removeprefix("problem_")
-    await state.update_data(problem=value)
-    await state.set_state(Diagnostics.format)
-    await _edit_or_send(callback, Q_FORMAT, format_keyboard())
-    await callback.answer()
-
-
-@router.callback_query(Diagnostics.format, F.data.startswith("format_"))
-async def process_format(callback: CallbackQuery, state: FSMContext) -> None:
-    value = callback.data.removeprefix("format_")
-    await state.update_data(format=value)
-    await state.set_state(Diagnostics.budget)
-    await _edit_or_send(callback, Q_BUDGET, budget_keyboard())
-    await callback.answer()
-
-
-@router.callback_query(Diagnostics.budget, F.data.startswith("budget_"))
-async def process_budget(callback: CallbackQuery, state: FSMContext) -> None:
-    value = callback.data.removeprefix("budget_")
-    await state.update_data(budget=value)
-
-    data = await state.get_data()
-    key, reason = recommend_product(data)
-    await state.update_data(recommended=key)
-    await state.set_state(None)
-
+@router.callback_query(F.data.startswith("prod_more_"))
+async def product_more(callback: CallbackQuery) -> None:
+    key = callback.data.removeprefix("prod_more_")
     product = PRODUCTS[key]
-    text = _build_recommendation_text(product, reason)
-    await _edit_or_send(callback, text, product_keyboard(key))
+    features = "\n".join(product["features"])
+    text = (
+        f"<b>{product['title']}</b>\n"
+        f"💰 {product['price']}\n\n"
+        f"{product['short']}\n\n"
+        f"{features}"
+    )
+    await callback.message.answer(text, reply_markup=product_keyboard(key))
     await callback.answer()
 
 
-def _build_recommendation_text(product: dict, reason: str) -> str:
+@router.callback_query(F.data.startswith("prod_why_"))
+async def product_why(callback: CallbackQuery) -> None:
+    key = callback.data.removeprefix("prod_why_")
+    product = PRODUCTS[key]
+    text = f"<b>Почему тебе подходит «{product['title']}»</b>\n\n{product['why']}"
+    await callback.message.answer(text, reply_markup=product_keyboard(key))
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("prod_choose_"))
+async def product_choose(callback: CallbackQuery) -> None:
+    key = callback.data.removeprefix("prod_choose_")
+    product = PRODUCTS[key]
+    text = CHOOSE_CONFIRM_TEXT.format(title=product["title"], price=product["price"])
+    await callback.message.answer(text, reply_markup=final_cta_keyboard())
+    await callback.answer()
+
+
+@router.callback_query(F.data == "prod_other")
+async def show_all_products(callback: CallbackQuery) -> None:
+    await callback.message.answer(ALL_PRODUCTS_TEXT, reply_markup=all_products_keyboard())
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("prod_view_"))
+async def product_view(callback: CallbackQuery) -> None:
+    key = callback.data.removeprefix("prod_view_")
+    product = PRODUCTS[key]
     features = "\n".join(product["features"])
-    return (
-        f"{RECOMMENDATION_HEADER}\n\n"
+    text = (
         f"<b>{product['title']}</b>\n"
         f"💰 {product['price']}\n\n"
         f"{features}\n\n"
-        f"<i>{reason}</i>"
+        f"<i>{product['why']}</i>"
     )
+    await callback.message.answer(text, reply_markup=product_keyboard(key))
+    await callback.answer()
 
 
-async def _edit_or_send(callback: CallbackQuery, text: str, keyboard) -> None:
-    try:
-        await callback.message.edit_text(text, reply_markup=keyboard)
-    except TelegramBadRequest:
-        await callback.message.answer(text, reply_markup=keyboard)
+@router.callback_query(F.data == "ask_trainer")
+async def ask_trainer(callback: CallbackQuery) -> None:
+    await callback.message.answer(ASK_TRAINER_TEXT, reply_markup=final_cta_keyboard())
+    await callback.answer()
