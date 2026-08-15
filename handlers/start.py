@@ -22,22 +22,17 @@ async def cmd_start(message: Message, state: FSMContext) -> None:
 
 
 async def send_welcome_parts(message: Message) -> None:
-    # Разбиваем историю на абзацы (по двум переносам строк)
-    parts = WELCOME_WITH_STORY.split("\n\n")
-    
-    # 1. Отправляем фото с первой частью (если фото работает)
+    # Вся история отправляется одним сообщением с фото
     try:
-        await message.answer_photo(photo=TRAINER_PHOTO_ID, caption=parts[0])
+        await message.answer_photo(
+            photo=TRAINER_PHOTO_ID,
+            caption=WELCOME_WITH_STORY  # весь текст целиком
+        )
     except TelegramBadRequest:
         logger.warning("Не удалось отправить фото, отправляю без фото.")
-        await message.answer(parts[0])
-    
-    # 2. Отправляем остальные части с задержкой 1.5 секунды
-    for part in parts[1:]:
-        await asyncio.sleep(1.5)
-        await message.answer(part)
-    
-    # 3. После всех частей ждём 3 секунды и отправляем меню
+        await message.answer(WELCOME_WITH_STORY)
+
+    # Через 3 секунды отправляем меню с кнопками
     await asyncio.sleep(3)
     await message.answer(MAIN_MENU_PROMPT, reply_markup=main_menu_keyboard())
 
