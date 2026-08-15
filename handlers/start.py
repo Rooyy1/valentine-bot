@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from aiogram import Router, F
@@ -7,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from config import TRAINER_PHOTO_ID
-from data.texts import MAIN_MENU_PROMPT, TRAINER_STORY, WELCOME_CAPTION
+from data.texts import MAIN_MENU_PROMPT, WELCOME_WITH_STORY  # импортируем новую переменную
 from keyboards.main import main_menu_keyboard
 
 router = Router()
@@ -17,19 +18,21 @@ logger = logging.getLogger(__name__)
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext) -> None:
     await state.clear()
-    await send_welcome(message)
+    await send_welcome_with_delay(message)
 
 
-async def send_welcome(message: Message) -> None:
+async def send_welcome_with_delay(message: Message) -> None:
+    # 1. Отправляем приветствие с фото (одно сообщение с историей)
     try:
-        await message.answer_photo(photo=TRAINER_PHOTO_ID, caption=WELCOME_CAPTION)
+        await message.answer_photo(photo=TRAINER_PHOTO_ID, caption=WELCOME_WITH_STORY)
     except TelegramBadRequest:
-        # file_id может быть недействителен для этого бота (см. config.py) —
-        # не роняем сценарий, а просто продолжаем текстом.
         logger.warning("Не удалось отправить фото тренера по file_id, отправляю без фото.")
-        await message.answer(WELCOME_CAPTION)
+        await message.answer(WELCOME_WITH_STORY)
 
-    await message.answer(TRAINER_STORY)
+    # 2. Ждём 3 секунды
+    await asyncio.sleep(3)
+
+    # 3. Отправляем меню (опросник)
     await message.answer(MAIN_MENU_PROMPT, reply_markup=main_menu_keyboard())
 
 
