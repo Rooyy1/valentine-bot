@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from config import TRAINER_PHOTO_ID
-from data.texts import MAIN_MENU_PROMPT, WELCOME_WITH_STORY  # импортируем новую переменную
+from data.texts import MAIN_MENU_PROMPT, WELCOME_WITH_STORY
 from keyboards.main import main_menu_keyboard
 
 router = Router()
@@ -18,21 +18,27 @@ logger = logging.getLogger(__name__)
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext) -> None:
     await state.clear()
-    await send_welcome_with_delay(message)
+    await send_welcome_parts(message)
 
 
-async def send_welcome_with_delay(message: Message) -> None:
-    # 1. Отправляем приветствие с фото (одно сообщение с историей)
+async def send_welcome_parts(message: Message) -> None:
+    # Разбиваем историю на абзацы (по двум переносам строк)
+    parts = WELCOME_WITH_STORY.split("\n\n")
+    
+    # 1. Отправляем фото с первой частью (если фото работает)
     try:
-        await message.answer_photo(photo=TRAINER_PHOTO_ID, caption=WELCOME_WITH_STORY)
+        await message.answer_photo(photo=TRAINER_PHOTO_ID, caption=parts[0])
     except TelegramBadRequest:
-        logger.warning("Не удалось отправить фото тренера по file_id, отправляю без фото.")
-        await message.answer(WELCOME_WITH_STORY)
-
-    # 2. Ждём 3 секунды
+        logger.warning("Не удалось отправить фото, отправляю без фото.")
+        await message.answer(parts[0])
+    
+    # 2. Отправляем остальные части с задержкой 1.5 секунды
+    for part in parts[1:]:
+        await asyncio.sleep(1.5)
+        await message.answer(part)
+    
+    # 3. После всех частей ждём 3 секунды и отправляем меню
     await asyncio.sleep(3)
-
-    # 3. Отправляем меню (опросник)
     await message.answer(MAIN_MENU_PROMPT, reply_markup=main_menu_keyboard())
 
 
