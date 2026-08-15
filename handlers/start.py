@@ -1,4 +1,3 @@
-```python
 import asyncio
 import logging
 
@@ -55,4 +54,3 @@ async def back_to_main(callback: CallbackQuery, state: FSMContext) -> None:
         reply_markup=main_menu_keyboard()
     )
     await callback.answer()
-```
