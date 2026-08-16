@@ -12,6 +12,7 @@ from data.texts import (
     Q_GOAL,
     Q_PROBLEM,
     RECOMMENDATION_HEADER,
+    BOOK_OFFER_TEXT,
 )
 from keyboards.diagnostics import (
     budget_keyboard,
@@ -29,6 +30,13 @@ router = Router()
 async def choose_category(callback: CallbackQuery, state: FSMContext) -> None:
     intro = CATEGORY_INTRO.get(callback.data, "Хорошо, давай разберёмся 🙌")
     await state.update_data(category=callback.data)
+    
+    # Если выбрали книгу — сразу показываем предложение без диагностики
+    if callback.data == "cat_book":
+        await callback.message.answer(BOOK_OFFER_TEXT, reply_markup=product_keyboard("recipes"))
+        await callback.answer()
+        return
+    
     await state.set_state(Diagnostics.goal)
     text = f"{intro}\n\n{DIAG_INTRO}\n\n{Q_GOAL}"
     await callback.message.answer(text, reply_markup=goal_keyboard())
