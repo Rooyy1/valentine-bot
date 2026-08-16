@@ -16,7 +16,7 @@ TRAINER_USERNAME = os.getenv("TRAINER_USERNAME", "Krismihalchampion_wff_wbb")
 # показывалось, отправьте это же фото вашему боту и подставьте новый file_id.
 TRAINER_PHOTO_ID = os.getenv(
     "TRAINER_PHOTO_ID",
-    "AgACAgIAAxkBAAMDaoCnJZ7jOI66oN0aYkLmEGT9BzYAAtwXaxvkSwlIu4TU-hOjIF8BAAMCAAN5AAM9BA",
+    "AgACAgIAAxkBAAOfaoGO9C7Jlj6k-PdZRm5b-UmTvRIAAsgbaxvkSxFILc_i02UkzW8BAAMCAAN5AAM9BA",
 )
 
 if not BOT_TOKEN:
