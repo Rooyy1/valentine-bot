@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
 
-from data.products import PRODUCTS
+from data.products import PRODUCTS, build_product_card
 from data.texts import ALL_PRODUCTS_TEXT, ASK_TRAINER_TEXT, CHOOSE_CONFIRM_TEXT
 from keyboards.product import all_products_keyboard, final_cta_keyboard, product_keyboard
 
@@ -11,15 +11,7 @@ router = Router()
 @router.callback_query(F.data.startswith("prod_more_"))
 async def product_more(callback: CallbackQuery) -> None:
     key = callback.data.removeprefix("prod_more_")
-    product = PRODUCTS[key]
-    features = "\n".join(product["features"])
-    text = (
-        f"<b>{product['title']}</b>\n"
-        f"💰 {product['price']}\n\n"
-        f"{product['short']}\n\n"
-        f"{features}"
-    )
-    await callback.message.answer(text, reply_markup=product_keyboard(key))
+    await callback.message.answer(build_product_card(key), reply_markup=product_keyboard(key))
     await callback.answer()
 
 
@@ -49,15 +41,10 @@ async def show_all_products(callback: CallbackQuery) -> None:
 
 @router.callback_query(F.data.startswith("prod_view_"))
 async def product_view(callback: CallbackQuery) -> None:
+    # Та же карточка, что и в "Подробнее" — состав и цена продукта
+    # должны выглядеть одинаково в любом месте бота.
     key = callback.data.removeprefix("prod_view_")
-    product = PRODUCTS[key]
-    features = "\n".join(product["features"])
-    text = (
-        f"<b>{product['title']}</b>\n"
-        f"💰 {product['price']}\n\n"
-        f"{features}\n\n"
-        f"<i>{product['why']}</i>"
-    )
+    text = f"{build_product_card(key)}\n\n<i>{PRODUCTS[key]['why']}</i>"
     await callback.message.answer(text, reply_markup=product_keyboard(key))
     await callback.answer()
 

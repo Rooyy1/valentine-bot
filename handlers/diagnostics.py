@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from data.products import PRODUCTS
+from data.products import PRODUCTS, build_product_card
 from data.recommend import recommend_product
 from data.texts import (
     CATEGORY_INTRO,
@@ -12,7 +12,6 @@ from data.texts import (
     Q_GOAL,
     Q_PROBLEM,
     RECOMMENDATION_HEADER,
-    BOOK_OFFER_TEXT,
 )
 from keyboards.diagnostics import (
     budget_keyboard,
@@ -31,9 +30,12 @@ async def choose_category(callback: CallbackQuery, state: FSMContext) -> None:
     intro = CATEGORY_INTRO.get(callback.data, "Хорошо, давай разберёмся 🙌")
     await state.update_data(category=callback.data)
     
-    # Если выбрали книгу — сразу показываем предложение без диагностики
+    # Если выбрали книгу — сразу показываем карточку без диагностики.
+    # Текст строится из PRODUCTS["recipes"] — цена и состав книги
+    # хранятся только в data/products.py, здесь ничего не дублируется.
     if callback.data == "cat_book":
-        await callback.message.answer(BOOK_OFFER_TEXT, reply_markup=product_keyboard("recipes"))
+        text = f"{intro}\n\n{build_product_card('recipes')}"
+        await callback.message.answer(text, reply_markup=product_keyboard("recipes"))
         await callback.answer()
         return
     

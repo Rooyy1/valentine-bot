@@ -28,17 +28,19 @@ def problem_keyboard() -> InlineKeyboardMarkup:
 
 def format_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.button(text="🤝 Тренировки с тренером в зале", callback_data="format_inperson")
+    builder.button(text="🏋️ Разовая тренировка в зале", callback_data="format_onetime")
+    builder.button(text="📋 Программа + питание, занимаюсь сам(а)", callback_data="format_selfmade")
     builder.button(text="💻 Полное сопровождение онлайн", callback_data="format_online")
-    builder.button(text="📖 Готовые материалы для себя", callback_data="format_selfmade")
-    builder.button(text="1️⃣ Разовая консультация / тренировка", callback_data="format_onetime")
+    builder.button(text="🤝 Регулярные тренировки с тренером в зале", callback_data="format_inperson")
     return _with_back(builder)
 
 
 def budget_keyboard() -> InlineKeyboardMarkup:
+    # Это бюджетный диапазон (шаг диагностики), а не цена одного товара —
+    # каждая карточка продукта дальше показывает свою единственную цену.
     builder = InlineKeyboardBuilder()
-    builder.button(text="До 1 500 ₽ разово", callback_data="budget_low")
-    builder.button(text="5 000 ₽ / месяц", callback_data="budget_mid")
-    builder.button(text="8 000–11 000 ₽ / месяц", callback_data="budget_high")
-    builder.button(text="От 23 000 ₽ / месяц", callback_data="budget_premium")
+    builder.button(text="До 1 500 ₽ (разовая тренировка)", callback_data="budget_low")
+    builder.button(text="≈5 000 ₽ (введение)", callback_data="budget_mid")
+    builder.button(text="8 000–11 000 ₽ (сопровождение / пакет)", callback_data="budget_high")
+    builder.button(text="От 23 000 ₽ (пакет с 12 тренировками)", callback_data="budget_premium")
     return _with_back(builder)

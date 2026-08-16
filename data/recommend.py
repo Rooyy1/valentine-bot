@@ -1,7 +1,11 @@
-"""Простая, но понятная логика рекомендации продукта по ответам диагностики.
+"""Логика рекомендации продукта по ответам диагностики.
 
-Бюджет — главный ограничитель. Внутри бюджетного диапазона уточняем выбор
-по формату помощи и текущей проблеме.
+Бюджет — главный ограничитель (нет смысла предлагать пакет за 23 000 ₽
+человеку, который готов заплатить один раз 1 500 ₽). Внутри бюджетного
+диапазона уточняем выбор по формату помощи и текущей проблеме.
+
+Ключи продуктов соответствуют data/products.py:
+gym_training, intro, online_coaching, intro_plus_4, intro_plus_12, recipes.
 """
 
 from data.products import PRODUCTS
@@ -14,25 +18,15 @@ def recommend_product(answers: dict) -> tuple[str, str]:
     fmt = answers.get("format")
     budget = answers.get("budget")
 
-    # Логика основана на бюджете как первичном фильтре
     if budget == "low":
-        # До 1 500 ₽ — либо книга, либо разовая тренировка
-        key = "recipes" if problem == "nutrition" else "personal_training"
-    
+        key = "recipes" if problem == "nutrition" else "gym_training"
     elif budget == "mid":
-        # ~5 000 ₽ — только введение (без тренировок)
-        key = "introduction"
-    
+        key = "intro"
     elif budget == "high":
-        # 8 000–11 000 ₽ — онлайн-ведение или пакет «Комфорт»
-        key = "comfort" if fmt == "inperson" else "online_coaching"
-    
+        key = "intro_plus_4" if fmt == "inperson" else "online_coaching"
     elif budget == "premium":
-        # От 23 000 ₽ — пакет «База»
-        key = "base"
-    
+        key = "intro_plus_12"
     else:
-        # Дефолтный вариант
         key = "online_coaching"
 
     reason = _build_reason(key, goal, problem)
