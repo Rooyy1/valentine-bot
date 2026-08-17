@@ -42,10 +42,12 @@ def system_q1_keyboard() -> InlineKeyboardMarkup:
     builder.button(text="🔄 Часть тренировок сделаю сам", callback_data="sq1_partial")
     return _with_back(builder)
 
+# Замени функцию system_q2_keyboard() на:
+
 def system_q2_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.button(text="💰 До 12 000 ₽", callback_data="sq2_medium")
-    builder.button(text="💎 Готов на 23 000 ₽", callback_data="sq2_high")
+    builder.button(text="4 тренировки (Комфорт)", callback_data="sq2_4")
+    builder.button(text="12 тренировок (База)", callback_data="sq2_12")
     return _with_back(builder)
 
 # =================== ОНЛАЙН-ВЕДЕНИЕ ===================

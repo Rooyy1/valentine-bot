@@ -138,14 +138,17 @@ async def process_system_q1(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.answer()
 
 @router.callback_query(Diagnostics.system_q2, F.data.startswith("sq2_"))
+# Найди функцию process_system_q2 и замени её целиком на:
+
+@router.callback_query(Diagnostics.system_q2, F.data.startswith("sq2_"))
 async def process_system_q2(callback: CallbackQuery, state: FSMContext) -> None:
-    budget = callback.data.removeprefix("sq2_")
+    count = callback.data.removeprefix("sq2_")  # будет "4" или "12"
     await state.clear()
 
     # Логика:
-    # - Если готов на 23.000 → База
-    # - Если до 12.000 → Комфорт
-    key = "base" if budget == "high" else "comfort"
+    # - Если 4 тренировки → Комфорт (11.000₽)
+    # - Если 12 тренировок → База (23.000₽)
+    key = "comfort" if count == "4" else "base"
     await callback.message.answer(
         f"{RECOMMENDATION_HEADER}\n\n{build_product_card(key)}",
         reply_markup=product_keyboard(key)
