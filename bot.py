@@ -26,7 +26,7 @@ async def main() -> None:
     dp.include_router(start.router)
     dp.include_router(diagnostics.router)
     dp.include_router(product.router)
-    dp.include_router(common.router)
+    dp.include_router(common.router)  # ловит всё, что не подошло другим роутерам
 
     @dp.error()
     async def error_handler(event: ErrorEvent) -> None:
@@ -34,9 +34,12 @@ async def main() -> None:
             "Ошибка при обработке апдейта %s: %s", event.update, event.exception
         )
 
-    await bot.delete_webhook(drop_pending_updates=True)
-    logger.info("Бот запущен, начинаю polling...")
-    await dp.start_polling(bot)
+    try:
+        await bot.delete_webhook(drop_pending_updates=True)
+        logger.info("Бот запущен, начинаю polling...")
+        await dp.start_polling(bot)
+    finally:
+        await bot.session.close()
 
 
 if __name__ == "__main__":
