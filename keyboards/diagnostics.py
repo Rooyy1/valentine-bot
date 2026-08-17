@@ -8,28 +8,52 @@ def _with_back(builder: InlineKeyboardBuilder) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def goal_keyboard() -> InlineKeyboardMarkup:
+# --- ТРЕНИРОВКИ (Вопрос 1) ---
+def workouts_goal_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.button(text="🔥 Похудение", callback_data="goal_loss")
-    builder.button(text="💪 Набор массы / рельеф", callback_data="goal_mass")
-    builder.button(text="⚖️ Тонус и форма", callback_data="goal_tone")
-    builder.button(text="🏆 Подготовка к соревнованиям", callback_data="goal_competition")
+    builder.button(text="🔥 Похудение", callback_data="wgoal_loss")
+    builder.button(text="💪 Набор массы", callback_data="wgoal_mass")
+    builder.button(text="⚖️ Тонус и форма", callback_data="wgoal_tone")
     return _with_back(builder)
 
 
-def problem_keyboard() -> InlineKeyboardMarkup:
+# --- ТРЕНИРОВКИ (Вопрос 2) ---
+def workouts_problem_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.button(text="🤔 Не знаю, как тренироваться", callback_data="problem_training")
-    builder.button(text="🍽 Не могу наладить питание", callback_data="problem_nutrition")
-    builder.button(text="📐 Хромает техника выполнения", callback_data="problem_technique")
-    builder.button(text="📉 Нет контроля и результата", callback_data="problem_control")
+    builder.button(text="📐 Не уверен в технике", callback_data="wprob_technique")
+    builder.button(text="🤔 Не знаю, как строить программу", callback_data="wprob_program")
+    builder.button(text="😫 Нет прогресса", callback_data="wprob_progress")
     return _with_back(builder)
 
 
-def format_keyboard() -> InlineKeyboardMarkup:
+# --- ПИТАНИЕ (Вопрос 1) ---
+def nutrition_problem_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.button(text="🏋️ Разовая тренировка в зале", callback_data="format_onetime")
-    builder.button(text="📋 Программа + питание, занимаюсь сам(а)", callback_data="format_selfmade")
-    builder.button(text="💻 Полное сопровождение онлайн", callback_data="format_online")
-    builder.button(text="🤝 Регулярные тренировки с тренером в зале", callback_data="format_inperson")
+    builder.button(text="🍔 Не могу отказаться от вредного", callback_data="nprob_junk")
+    builder.button(text="📉 Не понимаю КБЖУ", callback_data="nprob_kbju")
+    builder.button(text="🤷 Не знаю, что готовить", callback_data="nprob_meals")
+    return _with_back(builder)
+
+
+# --- ПИТАНИЕ (Вопрос 2) ---
+def nutrition_goal_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text="📉 Хочу сбросить вес и подсушиться", callback_data="ngoal_result")
+    builder.button(text="🍽 Хочу наладить привычки", callback_data="ngoal_habits")
+    return _with_back(builder)
+
+
+# --- ГОТОВАЯ СИСТЕМА (Вопрос 1) ---
+def system_frequency_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🤝 Хочу с тренером каждую тренировку", callback_data="sfreq_full")
+    builder.button(text="🔄 Готов часть тренировок делать сам", callback_data="sfreq_partial")
+    return _with_back(builder)
+
+
+# --- ГОТОВАЯ СИСТЕМА (Вопрос 2) ---
+def system_budget_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text="💰 До 12 000 ₽", callback_data="sbud_medium")
+    builder.button(text="💎 Готов инвестировать 23 000 ₽", callback_data="sbud_high")
     return _with_back(builder)
